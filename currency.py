@@ -8,8 +8,11 @@ import pandas
 currency_exrate = "EURUSD"
 moving_average_type = "SMA"
 
-# Dane dla średniej kroczącej 15 i 40 dni
+# step length for moving average for 15 and 40 days
 step_length = [15, 40]
+# make sure that every value is int and there are no negative values
+step_length_map = map(int, step_length)
+step_length = list(map(abs, step_length_map))
 
 # Zakładam że "za ostatni miesiąc" oznacza poprzedni miesiąc od 1-go do ostatniego dnia miesiąca.
 current_date = datetime.date.today()
