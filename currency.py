@@ -22,26 +22,26 @@ start_date = max_prev_days
 end_date = previous_month_last_day
 
 # from: https://pandas-datareader.readthedocs.io/en/latest/readers/yahoo.html#pandas_datareader.yahoo.fx.YahooFXReader
-eurusd_reader = pandas_datareader.yahoo.fx.YahooFXReader(symbols="EURUSD", start=start_date, end=end_date, interval='d')
-eurusd = eurusd_reader.read()
-print(eurusd.info())
+eur_exrate_reader = pandas_datareader.yahoo.fx.YahooFXReader(symbols="EURUSD", start=start_date, end=end_date, interval='d')
+eur_exrate = eur_exrate_reader.read()
+print(eur_exrate.info())
 # We will work on single column for simplifying
-eurusd = eurusd["Close"].to_frame()
+eur_exrate = eur_exrate["Close"].to_frame()
 
 new_date_idx = pandas.date_range(start_date, end_date)
-reindexed_eurusd = eurusd.reindex(new_date_idx, fill_value=None)
-filled_eurusd = reindexed_eurusd.fillna(method='pad')
+reindexed_eur_exrate = eur_exrate.reindex(new_date_idx, fill_value=None)
+filled_eur_exrate = reindexed_eur_exrate.fillna(method='pad')
 
 # Calculating simple moving average for Close
 # SMA15
-filled_eurusd["SMA15"] = filled_eurusd['Close'].rolling(15).mean()
+filled_eur_exrate["SMA15"] = filled_eur_exrate['Close'].rolling(15).mean()
 
 # SMA40
-filled_eurusd["SMA40"] = filled_eurusd['Close'].rolling(40).mean()
+filled_eur_exrate["SMA40"] = filled_eur_exrate['Close'].rolling(40).mean()
 
 # Draw the plot!
-eurusd_previous_month = filled_eurusd.loc[previous_month_1_day:previous_month_last_day]
-eurusd_previous_month.plot()
+eur_exrate_previous_month = filled_eur_exrate.loc[previous_month_1_day:previous_month_last_day]
+eur_exrate_previous_month.plot()
 plt.show()
 
 
