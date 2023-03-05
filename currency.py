@@ -3,6 +3,7 @@ import datetime
 import matplotlib.pyplot as plt
 import calendar
 import dateutil.relativedelta
+import pandas
 
 # Dane dla średniej kroczącej 15 i 40 dni
 step_length = [15, 40]
@@ -10,9 +11,9 @@ step_length = [15, 40]
 # Zakładam że "za ostatni miesiąc" oznacza poprzedni miesiąc od 1-go do ostatniego dnia miesiąca.
 current_date = datetime.date.today()
 
-previous_month_1_day = (current_date - dateutil.relativedelta.relativedelta(months=1)).replace(day=1) # 1st day for plot
+previous_month_1_day = (current_date - dateutil.relativedelta.relativedelta(months=1)).replace(day=1)  # 1st day for plot
 last_day_of_previous_month = calendar.monthrange(previous_month_1_day.year, previous_month_1_day.month)[1]
-previous_month_last_day = previous_month_1_day.replace(day=last_day_of_previous_month) # last day for plot
+previous_month_last_day = previous_month_1_day.replace(day=last_day_of_previous_month)  # last day for plot
 
 # Aby móc narysować wykres średnich kroczących potrzebujemy danych sprzed okresu który nas interesuje
 max_prev_days = previous_month_1_day - datetime.timedelta(days=max(step_length))
@@ -23,23 +24,23 @@ end_date = previous_month_last_day
 # from: https://pandas-datareader.readthedocs.io/en/latest/readers/yahoo.html#pandas_datareader.yahoo.fx.YahooFXReader
 eurusd_reader = pandas_datareader.yahoo.fx.YahooFXReader(symbols="EURUSD", start=start_date, end=end_date, interval='d')
 eurusd = eurusd_reader.read()
-print(eurusd)
-# date_minus_five = previous_month_last_day - datetime.timedelta(days=5)
-# print(eurusd.loc[date_minus_five])
 print(eurusd.info())
-
-
-# Calculating simple moving average for Close
+# We will work on single column for simplifying
 eurusd = eurusd["Close"].to_frame()
 
+new_date_idx = pandas.date_range(start_date, end_date)
+reindexed_eurusd = eurusd.reindex(new_date_idx, fill_value=None)
+filled_eurusd = reindexed_eurusd.fillna(method='pad')
+
+# Calculating simple moving average for Close
 # SMA15
-eurusd["SMA15"] = eurusd['Close'].rolling(15).mean()
+filled_eurusd["SMA15"] = filled_eurusd['Close'].rolling(15).mean()
 
 # SMA40
-eurusd["SMA40"] = eurusd['Close'].rolling(40).mean()
+filled_eurusd["SMA40"] = filled_eurusd['Close'].rolling(40).mean()
 
 # Draw the plot!
-eurusd_previous_month = eurusd.loc[start_date:previous_month_last_day]
+eurusd_previous_month = filled_eurusd.loc[previous_month_1_day:previous_month_last_day]
 eurusd_previous_month.plot()
 plt.show()
 
